@@ -14,7 +14,7 @@ build服务器在 http://ci.mxnet.io 。这台服务器有两块Nvidia M60。
 
 在本地可以如下build html（需要GPU支持）
 
-```bash
+```{.python .input}
 conda env update -f build/build.yml
 source activate gluon_zh_docs
 make html
@@ -24,7 +24,7 @@ make html
 
 如果没有改动notebook里面源代码，所以不想执行notebook，可以使用
 
-```
+```{.python .input}
 make html EVAL=0
 ```
 
@@ -34,11 +34,11 @@ make html EVAL=0
 
 编译pdf版本需要xelatex，和思源字体。在Ubuntu可以这样安装
 
-```bash
+```{.python .input}
 sudo apt-get install texlive-full
 ```
 
-```bash
+```{.python .input}
 wget https://github.com/adobe-fonts/source-han-sans/raw/release/OTF/SourceHanSansHWSC.zip
 wget https://github.com/adobe-fonts/source-han-serif/raw/release/OTF/SourceHanSerifSC_EL-M.zip
 unzip SourceHanSansHWSC.zip
@@ -51,12 +51,11 @@ sudo fc-cache -f -v
 
 然后可以编译了
 
-```bash
+```{.python .input}
 make latex
 cd _build/latex
 xelatex -interaction nonstopmode gluon_tutorials_zh.tex
 ```
-
 
 ## Terminology 中英术语对照表
 

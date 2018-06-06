@@ -28,7 +28,7 @@ $$y = X \cdot w + b + \eta, \quad \text{for } \eta \sim \mathcal{N}(0,\sigma^2)$
 
 这里噪音服从均值0和标准差为0.01的正态分布。
 
-```{.python .input  n=2}
+```{.python .input  n=1}
 from mxnet import ndarray as nd
 from mxnet import autograd
 
@@ -45,11 +45,21 @@ y += .01 * nd.random_normal(shape=y.shape)
 
 注意到`X`的每一行是一个长度为2的向量，而`y`的每一行是一个长度为1的向量（标量）。
 
-```{.python .input  n=3}
+```{.python .input  n=2}
 print(X[0], y[0])
 ```
 
-如果有兴趣，可以使用安装包中已包括的 Python 绘图包 `matplotlib`，生成第二个特征值 (`X[:, 1]`) 和目标值 `Y` 的散点图，更直观地观察两者间的关系。 
+```{.json .output n=2}
+[
+ {
+  "name": "stdout",
+  "output_type": "stream",
+  "text": "\n[ 2.21220636  0.7740038 ]\n<NDArray 2 @cpu(0)> \n[ 6.00058699]\n<NDArray 1 @cpu(0)>\n"
+ }
+]
+```
+
+如果有兴趣，可以使用安装包中已包括的 Python 绘图包 `matplotlib`，生成第二个特征值 (`X[:, 1]`) 和目标值 `Y` 的散点图，更直观地观察两者间的关系。
 
 ```{.python .input}
 import matplotlib.pyplot as plt
@@ -81,11 +91,21 @@ for data, label in data_iter():
     break
 ```
 
+```{.json .output n=5}
+[
+ {
+  "name": "stdout",
+  "output_type": "stream",
+  "text": "\n[[-1.55233979 -1.59788167]\n [-0.4295941  -1.34859979]\n [-0.61465675 -0.69152838]\n [ 0.42923245 -0.08443192]\n [-0.92666906  0.33800116]\n [ 1.35997415  0.68190068]\n [-0.47546953  0.86699176]\n [-0.08319951  0.21010068]\n [ 0.07727694 -0.73872542]\n [-1.14890003  1.32822943]]\n<NDArray 10x2 @cpu(0)> \n[ 6.54470444  7.91227579  5.32553244  5.35112286  1.17900813  4.59931612\n  0.2901226   3.33713627  6.85617256 -2.62378383]\n<NDArray 10 @cpu(0)>\n"
+ }
+]
+```
+
 ## 初始化模型参数
 
 下面我们随机初始化模型参数
 
-```{.python .input  n=6}
+```{.python .input  n=37}
 w = nd.random_normal(shape=(num_inputs, 1))
 b = nd.zeros((1,))
 params = [w, b]
@@ -93,7 +113,7 @@ params = [w, b]
 
 之后训练时我们需要对这些参数求导来更新它们的值，使损失尽量减小；因此我们需要创建它们的梯度。
 
-```{.python .input  n=7}
+```{.python .input  n=38}
 for param in params:
     param.attach_grad()
 ```
@@ -102,7 +122,7 @@ for param in params:
 
 线性模型就是将输入和模型的权重（`w`）相乘，再加上偏移（`b`）：
 
-```{.python .input  n=8}
+```{.python .input  n=9}
 def net(X):
     return nd.dot(X, w) + b
 ```
@@ -111,7 +131,23 @@ def net(X):
 
 我们使用常见的平方误差来衡量预测目标和真实目标之间的差距。
 
-```{.python .input  n=9}
+```{.python .input  n=11}
+x=3
+print(x)
+print(x * 2)
+```
+
+```{.json .output n=11}
+[
+ {
+  "name": "stdout",
+  "output_type": "stream",
+  "text": "3\n6\n"
+ }
+]
+```
+
+```{.python .input  n=12}
 def square_loss(yhat, y):
     # 注意这里我们把y变形成yhat的形状来避免矩阵形状的自动转换
     return (yhat - y.reshape(yhat.shape)) ** 2
@@ -121,7 +157,7 @@ def square_loss(yhat, y):
 
 虽然线性回归有显式解，但绝大部分模型并没有。所以我们这里通过随机梯度下降来求解。每一步，我们将模型参数沿着梯度的反方向走特定距离，这个距离一般叫**学习率（learning rate）** `lr`。（我们会之后一直使用这个函数，我们将其保存在[utils.py](../utils.py)。）
 
-```{.python .input  n=10}
+```{.python .input  n=13}
 def SGD(params, lr):
     for param in params:
         param[:] = param - lr * param.grad
@@ -150,13 +186,13 @@ def plot(losses, X, sample_size=100):
     plt.show()
 ```
 
-```{.python .input  n=11}
+```{.python .input  n=39}
 epochs = 5
-learning_rate = .001
+learning_rate = 0.01
 niter = 0
 losses = []
 moving_loss = 0
-smoothing_constant = .01
+smoothing_constant = 5
 
 # 训练
 for e in range(epochs):    
@@ -181,17 +217,53 @@ for e in range(epochs):
         if (niter + 1) % 100 == 0:
             losses.append(est_loss)
             print("Epoch %s, batch %s. Moving avg of loss: %s. Average loss: %f" % (e, niter, est_loss, total_loss/num_examples))
-            plot(losses, X)
+            #plot(losses, X)
+```
+
+```{.json .output n=39}
+[
+ {
+  "name": "stdout",
+  "output_type": "stream",
+  "text": "Epoch 0, batch 99. Moving avg of loss: 46.21437146662299. Average loss: 1.059315\nEpoch 1, batch 199. Moving avg of loss: 46.21437146662299. Average loss: 0.000102\nEpoch 2, batch 299. Moving avg of loss: 46.21437146662299. Average loss: 0.000101\nEpoch 3, batch 399. Moving avg of loss: 46.21437146662299. Average loss: 0.000103\nEpoch 4, batch 499. Moving avg of loss: 46.21437146662299. Average loss: 0.000104\n"
+ }
+]
 ```
 
 训练完成后，我们可以比较学得的参数和真实参数
 
-```{.python .input  n=12}
+```{.python .input  n=34}
 true_w, w
 ```
 
-```{.python .input  n=13}
+```{.json .output n=34}
+[
+ {
+  "data": {
+   "text/plain": "([2, -3.4], \n [[ nan]\n  [ nan]]\n <NDArray 2x1 @cpu(0)>)"
+  },
+  "execution_count": 34,
+  "metadata": {},
+  "output_type": "execute_result"
+ }
+]
+```
+
+```{.python .input  n=29}
 true_b, b
+```
+
+```{.json .output n=29}
+[
+ {
+  "data": {
+   "text/plain": "(4.2, \n [ 4.19995356]\n <NDArray 1 @cpu(0)>)"
+  },
+  "execution_count": 29,
+  "metadata": {},
+  "output_type": "execute_result"
+ }
+]
 ```
 
 ## 结论
